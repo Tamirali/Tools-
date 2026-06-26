@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ICP — Indian Certified Person · Category Suite</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+        /* ── Fonts ── */
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Great+Vibes&family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&family=Poppins:wght@300;400;500;600;700&family=Roboto+Slab:wght@600;700&family=Tangerine:wght@700&display=swap');
+
+        /* ── Root CSS Variables (theming) ── */
+        :root {
+            --cert-primary: #1e3a5f;
+            --cert-accent: #d4a737;
+            --cert-bg: #ffffff;
+            --cert-text: #0f172a;
+            --cert-border: #d4a737;
+            --cert-font-heading: 'Cinzel', serif;
+            --cert-font-body: 'Poppins', sans-serif;
+            --cert-font-sign: 'Great Vibes', cursive;
+            --cert-border-style: double;
+            --cert-border-width: 20px;
+        }
+
+        /* ── Base ── */
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            background: #f1f5f9;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* ── Scrollable Tools Panel ── */
+        .tools-panel {
+            max-height: calc(100vh - 140px);
+            overflow-y: auto;
+            scrollbar-width: thin;
+        }
+        .tools-panel::-webkit-scrollbar {
+            width: 4px;
+        }
+        .tools-panel::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 20px;
+        }
+
+        /* ── Certificate Wrapper ── */
+        #certificateArea {
+            width: 850px;
+            flex-shrink: 0;
+            min-height: 600px;
+            background: var(--cert-bg);
+            border: var(--cert-border-width) solid var(--cert-border);
+            position: relative;
+            transition: all 0.25s ease;
+            font-family: var(--cert-font-body);
+            color: var(--cert-text);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Inner decorative frames */
+        #certificateArea .frame-inner {
+            position: absolute;
+            inset: 12px;
+            border: 2px solid var(--cert-accent);
+            opacity: 0.4;
+            pointer-events: none;
+            z-index: 5;
+        }
+        #certificateArea .frame-inner2 {
+            position: absolute;
+            inset: 18px;
+            border: 1px solid var(--cert-border);
+            opacity: 0.2;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        /* ── Main content grid ── */
+        .cert-grid {
+            display: grid;
+            grid-template-columns: 1fr 200px;
+            gap: 10px;
+            padding: 40px 30px 20px 40px;
+            flex: 1;
+            position: relative;
+            z-index: 10;
+        }
+        .cert-left {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .cert-right {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 8px;
+            padding-top: 10px;
+        }
+
+        /* ── Footer ── */
+        .cert-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 10px 40px 20px 40px;
+            position: relative;
+            z-index: 10;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            margin-top: auto;
+        }
+
+        /* ── Template variants ── */
+        .template-classic {
+            --cert-primary: #1e3a5f;
+            --cert-accent: #d4a737;
+            --cert-bg: #ffffff;
+            --cert-text: #0f172a;
+            --cert-border: #d4a737;
+            --cert-font-heading: 'Cinzel', serif;
+            --cert-font-body: 'Poppins', sans-serif;
+            --cert-font-sign: 'Great Vibes', cursive;
+            --cert-border-style: double;
+        }
+        .template-modern {
+            --cert-primary: #0f2b4a;
+            --cert-accent: #3b82f6;
+            --cert-bg: #fafcff;
+            --cert-text: #0b1e33;
+            --cert-border: #3b82f6;
+            --cert-font-heading: 'Roboto Slab', serif;
+            --cert-font-body: 'Inter', sans-serif;
+            --cert-font-sign: 'Tangerine', cursive;
+            --cert-border-style: solid;
+        }
+        .template-elegant {
+            --cert-primary: #1a3a2a;
+            --cert-accent: #2d7d46;
+            --cert-bg: #fafff7;
+            --cert-text: #0f2a1a;
+            --cert-border: #2d7d46;
+            --cert-font-heading: 'Playfair Display', serif;
+            --cert-font-body: 'Poppins', sans-serif;
+            --cert-font-sign: 'Great Vibes', cursive;
+            --cert-border-style: groove;
+        }
+        .template-premium {
+            --cert-primary: #1a1a2e;
+            --cert-accent: #c9a84c;
+            --cert-bg: #12121e;
+            --cert-text: #f0e9d8;
+            --cert-border: #c9a84c;
+            --cert-font-heading: 'Cinzel', serif;
+            --cert-font-body: 'Poppins', sans-serif;
+            --cert-font-sign: 'Tangerine', cursive;
+            --cert-border-style: solid;
+        }
+
+        #certificateArea .cert-title { font-family: var(--cert-font-heading); color: var(--cert-accent); }
+        #certificateArea .cert-name { font-family: var(--cert-font-heading); color: var(--cert-primary); }
+        #certificateArea .cert-signature { font-family: var(--cert-font-sign); color: var(--cert-primary); }
+        #certificateArea .cert-company { color: var(--cert-primary); }
+        #certificateArea .cert-details { color: var(--cert-text); }
+        
+        #certificateArea .cert-category-badge {
+            display: inline-block;
+            background: var(--cert-accent);
+            color: var(--cert-bg);
+            font-size: 9px;
+            font-weight: 700;
+            padding: 2px 12px;
+            border-radius: 20px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .photo-slot {
+            width: 120px;
+            height: 140px;
+            border: 3px solid var(--cert-accent);
+            border-radius: 8px;
+            overflow: hidden;
+            background: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+        .photo-slot img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .photo-caption {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--cert-primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid var(--cert-accent);
+            padding-bottom: 4px;
+            margin-bottom: 4px;
+            width: 100%;
+            text-align: center;
+        }
+
+        #qrcode canvas { display: block; margin: 0 auto; border-radius: 4px; }
+        .qr-label { font-size: 7px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #94a3b8; margin-top: 4px; }
+
+        .stamp-circle {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 4px solid var(--cert-accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            font-weight: 900;
+            text-transform: uppercase;
+            color: var(--cert-accent);
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(2px);
+            text-align: center;
+            line-height: 1.2;
+            padding: 4px;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+        }
+
+        #watermarkLayer {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.03;
+            pointer-events: none;
+            user-select: none;
+            z-index: 0;
+            font-size: 80px;
+            font-weight: 900;
+            letter-spacing: 10px;
+            text-transform: uppercase;
+            color: var(--cert-text);
+        }
+
+        .category-btn {
+            padding: 6px 14px;
+            border-radius: 30px;
+            border: 2px solid #e2e8f0;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            background: white;
+            color: #475569;
+        }
+        .category-btn.active {
+            border-color: var(--cert-accent);
+            background: #fef9e7;
+            color: var(--cert-primary);
+            box-shadow: 0 0 0 2px rgba(212, 167, 55, 0.15);
+        }
+        .category-btn:hover { border-color: #94a3b8; }
+
+        #previewContainer { overflow-x: auto; display: flex; flex-direction: column; align-items: center; width: 100%; padding: 0 10px; }
+        .cert-scroll-wrapper { overflow-x: auto; width: 100%; display: flex; justify-content: center; padding: 10px 0; }
+        .cert-scroll-wrapper::-webkit-scrollbar { height: 8px; }
+        .cert-scroll-wrapper::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 20px; }
+
+        @media (max-width: 1024px) {
+            #certificateArea { width: 850px; }
+            .cert-grid { grid-template-columns: 1fr 180px; padding: 30px 20px 20px 25px; }
+            .photo-slot { width: 100px; height: 120px; }
+            .cert-scroll-wrapper { justify-content: flex-start; }
+        }
+        @media (max-width: 640px) {
+            .cert-grid { grid-template-columns: 1fr 140px; padding: 20px 15px 15px 20px; }
+            .photo-slot { width: 80px; height: 96px; }
+            .cert-footer { flex-wrap: wrap; gap: 10px; justify-content: center; }
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; }
+            #certificateArea { width: 850px; margin: 0 auto; border-width: var(--cert-border-width) !important; }
+            .cert-scroll-wrapper { overflow: visible; }
+        }
+
+        input[type="color"] { width: 40px; height: 40px; padding: 2px; border-radius: 8px; border: 2px solid #e2e8f0; cursor: pointer; }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        input[type="color"]::-webkit-color-swatch { border: none; border-radius: 6px; }
+
+        .tool-section { border-bottom: 1px solid #e2e8f0; }
+        .tool-section:last-child { border-bottom: none; }
+        .tool-section-header { cursor: pointer; user-select: none; transition: background 0.15s; }
+        .tool-section-header:hover { background: #f8fafc; }
+        
+        .tool-section-content {
+            overflow: hidden;
+            max-height: 0;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            padding: 0 0 0 0;
+        }
+        .tool-section-content.open { max-height: 950px; padding: 12px 0 16px 0; }
+
+        .template-option { padding: 8px 14px; border-radius: 20px; border: 2px solid #e2e8f0; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.15s; background: white; }
+        .template-option.active { border-color: var(--cert-accent); background: #fef9e7; box-shadow: 0 0 0 2px rgba(212, 167, 55, 0.15); }
+        .template-option:hover { border-color: #94a3b8; }
+
+        .stamp-option { width: 48px; height: 48px; border-radius: 50%; border: 3px solid #94a3b8; display: inline-flex; align-items: center; justify-content: center; font-size: 7px; font-weight: 800; text-transform: uppercase; cursor: pointer; transition: all 0.15s; background: white; color: #475569; }
+        .stamp-option.active { border-color: var(--cert-accent); color: var(--cert-accent); box-shadow: 0 0 0 2px rgba(212, 167, 55, 0.2); }
+        .stamp-option:hover { transform: scale(1.05); }
+
+        .live-pulse { display: inline-block; width: 10px; height: 10px; background: #22c55e; border-radius: 50%; margin-right: 6px; animation: pulse 1.5s ease-in-out infinite; }
+        @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
+
+        @keyframes flash { 0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5); } 50% { box-shadow: 0 0 30px 10px rgba(34, 197, 94, 0.3); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
+        .flash-animation { animation: flash 0.6s ease-out; }
+
+        .header-category-badge { background: rgba(255,255,255,0.15); padding: 4px 16px; border-radius: 30px; font-size: 11px; font-weight: 600; letter-spacing: 1px; border: 1px solid rgba(255,255,255,0.2); }
+        .scroll-hint { font-size: 11px; color: #94a3b8; text-align: center; margin-top: 6px; display: flex; align-items: center; justify-content: center; gap: 4px; }
+        .scroll-hint span { background: #e2e8f0; padding: 2px 8px; border-radius: 12px; font-weight: 600; font-size: 10px; }
+    </style>
+</head>
+<body>
+
+    <header class="bg-slate-900 text-white p-4 shadow-lg no-print border-b-4 border-amber-500 flex items-center justify-between flex-wrap gap-2">
+        <div class="flex items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-extrabold tracking-wider flex items-center gap-2">
+                    <span>🇮🇳</span> INDIAN CERTIFIED PERSON
+                </h1>
+                <p class="text-[10px] tracking-widest text-amber-400 uppercase font-semibold">
+                    अक्ल की जीत · सत्य और प्रामाणिकता की डिजिटल पहचान
+                </p>
+            </div>
+            <div class="flex items-center gap-3 ml-4">
+                <span class="header-category-badge flex items-center gap-2">
+                    <span class="live-pulse"></span>
+                    <span id="headerCategoryLabel">SCHOOL</span>
+                </span>
+                <button id="refreshBtn" class="bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold px-4 py-1.5 rounded-full text-xs transition transform active:scale-95 shadow-md flex items-center gap-1">
+                    <span>⟳</span> Refresh
+                </button>
+            </div>
+        </div>
+        <div class="flex items-center gap-3 text-xs">
+            <span class="bg-amber-500/20 text-amber-300 px-3 py-1 rounded-full font-bold">v3.0 · Category Suite</span>
+            <button id="resetBtn" class="bg-slate-700 hover:bg-slate-600 px-4 py-1.5 rounded-lg text-white font-medium transition cursor-pointer">
+                ⟳ Reset
+            </button>
+        </div>
+    </header>
+
+    <div class="container mx-auto p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <div id="editorPanel" class="lg:col-span-4 bg-white rounded-2xl shadow-xl border border-slate-200 p-4 no-print tools-panel">
+
+            <h2 class="text-lg font-bold text-slate-800 flex items-center justify-between border-b pb-2 mb-3">
+                <span>🛠️ Certificate Tools</span>
+                <span class="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-medium">Live</span>
+            </h2>
+
+            <div class="tool-section">
+                <div class="tool-section-header flex items-center justify-between py-2.5" id="secHeaderCategory">
+                    <span class="font-semibold text-slate-700 text-sm">📂 Category</span>
+                    <span class="text-slate-400 text-xs">▼</span>
+                </div>
+                <div class="tool-section-content open">
+                    <div class="flex flex-wrap gap-1.5 mb-1">
+                        <button class="category-btn" data-category="work">💼 Work</button>
+                        <button class="category-btn active" data-category="school">📚 School</button>
+                        <button class="category-btn" data-category="achievement">🏆 Achievement</button>
+                        <button class="category-btn" data-category="medical">🏥 Medical</button>
+                        <button class="category-btn" data-category="government">🏛️ Government</button>
+                        <button class="category-btn" data-category="other">📌 Other</button>
+                    </div>
+                    <div id="categoryBadgePreview" class="text-[10px] text-slate-500 italic">Current: School</div>
+                </div>
+            </div>
+
+            <div class="tool-section">
+                <div class="tool-section-header flex items-center justify-between py-2.5" id="secHeaderTemplate">
+                    <span class="font-semibold text-slate-700 text-sm">🎨 Template</span>
+                    <span class="text-slate-400 text-xs">▼</span>
+                </div>
+                <div class="tool-section-content open">
+                    <div class="flex flex-wrap gap-2 mb-2">
+                        <button class="template-option active" data-template="classic">🏛️ Classic</button>
+                        <button class="template-option" data-template="modern">💎 Modern</button>
+                        <button class="template-option" data-template="elegant">🌿 Elegant</button>
+                        <button class="template-option" data-template="premium">🌙 Premium</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tool-section">
+                <div class="tool-section-header flex items-center justify-between py-2.5" id="secHeaderContent">
+                    <span class="font-semibold text-slate-700 text-sm">📝 Content</span>
+                    <span class="text-slate-400 text-xs">▼</span>
+                </div>
+                <div class="tool-section-content open">
+                    <div class="space-y-3" id="dynamicForm">
+                        <div>
+                            <label id="lblCompany" class="block text-[10px] font-bold uppercase text-slate-500">School Name</label>
+                            <input type="text" id="inpCompany" value="DR. MUKHTAR AHMAD ANSARI JUNIOR HIGH SCHOOL" placeholder="e.g., National Cyber Security" class="w-full p-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-600 outline-none">
+                        </div>
+                        <div>
+                            <label id="lblAddress" class="block text-[10px] font-bold uppercase text-slate-500">School Address</label>
+                            <input type="text" id="inpAddress" value="BANSBARIYA, DISTRICT: HOOGHLY, WEST BENGAL, PIN: 712502" placeholder="New Delhi, India" class="w-full p-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-600 outline-none">
+                        </div>
+                        <div>
+                            <label id="lblTitle" class="block text-[10px] font-bold uppercase text-slate-500">Certificate Title</label>
+                            <input type="text" id="inpTitle" value="NON-MATRICULATION CERTIFICATE" placeholder="e.g., Certified Professional" class="w-full p-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-600 outline-none">
+                        </div>
+                        <div>
+                            <label id="lblName" class="block text-[10px] font-bold uppercase text-slate-500">Student Full Name</label>
+                            <input type="text" id="inpName" value="TAMEER ALI KHAN" placeholder="John Doe" class="w-full p-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-600 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase text-slate-500">Age (1 - 100 वर्ष)</label>
+                            <input type="number" id="inpAge" value="28" min="1" max="100" placeholder="आयु दर्ज करें" class="w-full p-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-600 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase text-slate-500">Profile Photo</label>
+                            <input type="file" id="inpPhoto" accept="image/*" class="w-full text-xs file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-900 hover:file:bg-blue-100 cursor-pointer">
+                        </div>
+                        <div>
+                            <label id="lblDetails" class="block text-[10px] font-bold uppercase text-slate-500">Description / Details</label>
+                            <textarea id="inpDetails" rows="2" placeholder="Has successfully demonstrated..." class="w-full p-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-600 outline-none">This is to certify that the above-mentioned student has studied in this institution and left school prior to completing the matriculation framework requirements.</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tool-section">
+                <div class="tool-section-header flex items-center justify-between py-2.5" id="secHeaderDesign">
+                    <span class="font-semibold text-slate-700 text-sm">🎯 Design</span>
+                    <span class="text-slate-400 text-xs">▼</span>
+                </div>
+                <div class="tool-section-content">
+                    <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase text-slate-500">Primary</label>
+                            <input type="color" id="colorPrimary" value="#2d3748">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase text-slate-500">Accent</label>
+                            <input type="color" id="colorAccent" value="#ecc94b">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase text-slate-500">Text</label>
+                            <input type="color" id="colorText" value="#1a202c">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase text-slate-500">Background</label>
+                            <input type="color" id="colorBg" value="#f7fafc">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-[10px] font-bold uppercase text-slate-500">Border Color</label>
+                            <input type="color" id="colorBorder" value="#ecc94b">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-[10px] font-bold uppercase text-slate-500">Border Style</label>
+                            <select id="borderStyle" class="w-full p-1.5 border rounded-lg text-sm">
+                                <option value="solid">Solid</option>
+                                <option value="double" selected>Double</option>
+                                <option value="groove">Groove</option>
+                                <option value="ridge">Ridge</option>
+                                <option value="dashed">Dashed</option>
+                            </select>
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-[10px] font-bold uppercase text-slate-500">Border Width (px)</label>
+                            <input type="range" id="borderWidth" min="8" max="40" value="20" class="w-full">
+                            <span id="borderWidthLabel" class="text-xs text-slate-500">20</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tool-section">
+                <div class="tool-section-header flex items-center justify-between py-2.5" id="secHeaderAdvanced">
+                    <span class="font-semibold text-slate-700 text-sm">⚙️ Advanced</span>
+                    <span class="text-slate-400 text-xs">▼</span>
+                </div>
+                <div class="tool-section-content">
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase text-slate-500">Certificate ID</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="inpCertId" placeholder="Auto-generated" class="flex-1 p-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-600 outline-none">
+                                <button id="regenCertIdBtn" class="bg-slate-200 hover:bg-slate-300 px-3 rounded-lg text-sm font-medium transition cursor-pointer">↻</button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase text-slate-500">Issue Date</label>
+                                <input type="date" id="inpIssueDate" class="w-full p-2 border rounded-lg text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase text-slate-500">Expiry Date</label>
+                                <input type="date" id="inpExpiryDate" class="w-full p-2 border rounded-lg text-sm">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase text-slate-500">Signature (upload image)</label>
+                            <input type="file" id="inpSignature" accept="image/*" class="w-full text-xs file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-50 file:text-amber-900 hover:file:bg-amber-100 cursor-pointer">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase text-slate-500">Digital Stamp</label>
+                            <div class="flex flex-wrap gap-2">
+                                <button class="stamp-option active" data-stamp="none">⛔</button>
+                                <button class="stamp-option" data-stamp="seal">🔵</button>
+                                <button class="stamp-option" data-stamp="star">⭐</button>
+                                <button class="stamp-option" data-stamp="shield">🛡️</button>
+                                <button class="stamp-option" data-stamp="certified">✅</button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase text-slate-500">Watermark Text</label>
+                            <input type="text" id="inpWatermark" value="SCHOOL RECORD" placeholder="e.g., VERIFIED" class="w-full p-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-600 outline-none">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tool-section border-b-0">
+                <div class="py-3 space-y-2">
+                    <button id="publishBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition transform active:scale-95 cursor-pointer text-sm">
+                        ☁️ Publish & Secure to Cloud
+                    </button>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button id="exportPngBtn" class="bg-blue-900 hover:bg-blue-950 text-white font-bold py-2 px-3 rounded-xl shadow transition text-sm cursor-pointer">
+                            🖼️ PNG
+                        </button>
+                        <button id="exportPdfBtn" class="bg-rose-800 hover:bg-rose-900 text-white font-bold py-2 px-3 rounded-xl shadow transition text-sm cursor-pointer">
+                            📄 PDF
+                        </button>
+                        <button id="printBtn" class="bg-slate-700 hover:bg-slate-800 text-white font-bold py-2 px-3 rounded-xl shadow transition text-sm cursor-pointer col-span-2">
+                            🖨️ Print
+                        </button>
+                        <button id="adminDeleteBtn" class="hidden bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-xl shadow transition text-sm cursor-pointer col-span-2">
+                            🗑️ Admin Security: Delete Record
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="previewContainer" class="lg:col-span-8 flex flex-col items-center">
+
+            <div id="verifiedBadge" class="hidden w-full max-w-[850px] bg-emerald-50 border-2 border-emerald-500 text-emerald-900 p-3 rounded-xl mb-4 items-center gap-3 shadow-sm no-print">
+                <span class="text-xl">✅</span>
+                <div>
+                    <p class="text-xs font-bold">सर्टिफिकेट सत्यापित: यह रिकॉर्ड सुरक्षित क्लाउड डेटाबेस से सिंक है — 100% प्रामाणिक (Authentic).</p>
+                    <p class="text-[10px] text-emerald-700 font-medium tracking-wide">the victory of wisdom — अक्ल की जीत</p>
+                </div>
+            </div>
+
+            <div class="cert-scroll-wrapper w-full">
+                <div id="certificateArea" class="template-classic">
+
+                    <div class="frame-inner"></div>
+                    <div class="frame-inner2"></div>
+
+                    <div id="watermarkLayer">SCHOOL RECORD</div>
+
+                    <div class="cert-grid">
+                        <div class="cert-left">
+                            <div id="categoryBadge" class="cert-category-badge">SCHOOL</div>
+
+                            <h3 id="certCompany" class="text-2xl font-extrabold tracking-wider cert-company uppercase">DR. MUKHTAR AHMAD ANSARI JUNIOR HIGH SCHOOL</h3>
+                            <p id="certAddress" class="text-[10px] text-slate-500 tracking-widest uppercase font-medium">BANSBARIYA, DISTRICT: HOOGHLY, WEST BENGAL, PIN: 712502</p>
+                            <div class="w-28 h-0.5 bg-amber-500 my-3" id="certAccentDivider"></div>
+
+                            <h2 id="certTitle" class="text-3xl font-bold cert-title tracking-wide mb-2">NON-MATRICULATION CERTIFICATE</h2>
+                            <p class="text-xs text-slate-500 italic font-medium">This document solemnly validates that</p>
+                            
+                            <div class="my-1">
+                                <h1 id="certName" class="text-2xl font-extrabold cert-name border-b-2 border-slate-300 inline-block py-0.5 min-w-[200px] uppercase tracking-wide">TAMEER ALI KHAN</h1>
+                                <span id="certAgeDisplay" class="text-xs font-bold text-slate-500 ml-2 hidden">(Age: —)</span>
+                            </div>
+
+                            <p id="certDetails" class="text-[11px] text-slate-600 leading-relaxed mt-3 max-w-[420px] font-normal cert-details">
+                                This is to certify that the above-mentioned student has studied in this institution and left school prior to completing the matriculation framework requirements.
+                            </p>
+                            
+                            <div id="datesRow" class="flex gap-6 text-[10px] font-medium text-slate-500 mt-3">
+                                <span id="issueDateDisplay">Issue: —</span>
+                                <span id="expiryDateDisplay">Expiry: —</span>
+                            </div>
+                        </div>
+
+                        <div class="cert-right">
+                            <div class="photo-slot">
+                                <img id="certPhoto" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=256&auto=format&fit=crop" alt="Candidate">
+                            </div>
+                            <div class="photo-caption" id="certPhotoName">TAMEER ALI KHAN</div>
+                            <div id="qrcode" class="p-1 bg-white border border-slate-200 shadow-sm"></div>
+                            <div class="qr-label">SCAN TO VERIFY</div>
+                        </div>
+                    </div>
+
+                    <div class="cert-footer">
+                        <div class="flex items-center gap-3">
+                            <div class="w-14 h-14 rounded-full border-4 flex items-center justify-center text-center" id="footerBrandCircle">
+                                <span class="text-[7px] font-black uppercase leading-tight text-slate-700" id="footerBrandText">ICP<br>BRAND</span>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-extrabold text-slate-800 uppercase tracking-wider" id="footerAuditText">National Audit</p>
+                                <p class="text-[8px] font-semibold text-slate-500">ID: <span id="certId" class="text-blue-900 font-mono">ICP-UNPUBLISHED</span></p>
+                            </div>
+                        </div>
+
+                        <div id="stampContainer" class="flex items-center justify-center"></div>
+
+                        <div class="text-center">
+                            <div id="signatureContainer" class="h-8 flex items-center justify-center">
+                                <p id="certSignature" class="cert-signature text-xl font-semibold select-none transform -rotate-2">Haider Ali</p>
+                                <img id="signatureImage" src="" class="hidden h-8 object-contain" alt="Signature">
+                            </div>
+                            <div class="w-24 h-px bg-slate-400 mx-auto my-0.5"></div>
+                            <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Headmaster</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="scroll-hint no-print">
+                <span>⟷</span> Scroll left/right to view full certificate <span>⟷</span>
+            </div>
+            <div class="mt-2 text-[10px] text-slate-400 font-mono no-print" id="statusBadge">◆ Live Preview · Updates in real-time</div>
+        </div>
+
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, set, get, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // Firebase Setup configuration 
+        const firebaseConfig = {
+            apiKey: "AIzaSyCepLvbT6FagrbUrkDvKLIFw6rPDeknvTk",
+            authDomain: "text-editor-88762.firebaseapp.com",
+            projectId: "text-editor-88762",
+            storageBucket: "text-editor-88762.firebasestorage.app",
+            messagingSenderId: "401125552047",
+            appId: "1:401125552047:web:c99020bd42e5372aad895a",
+            measurementId: "G-GJ2CR5VMD6",
+            databaseURL: "https://text-editor-88762-default-rtdb.firebaseio.com"
+        };
+
+        // Initialize Firebase app instance
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // ─── STATE ───
+        let base64Photo = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=256&auto=format&fit=crop";
+        let base64Signature = null;
+        let qrInstance = null;
+        let currentStamp = 'none';
+        let currentTemplate = 'classic';
+        let currentCategory = 'school';
+
+        const categoryMap = {
+            work: {
+                label: 'WORK', template: 'classic', primary: '#1e3a5f', accent: '#d4a737', text: '#0f172a', bg: '#ffffff', border: '#d4a737', borderStyle: 'double', defaultTitle: 'CERTIFICATE OF EMPLOYMENT',
+                formLabels: {
+                    company: { label: 'Organization Name', placeholder: 'e.g., Acme Corp' },
+                    address: { label: 'Office Address', placeholder: 'Mumbai, India' },
+                    title: { label: 'Job Title', placeholder: 'e.g., Senior Developer' },
+                    name: { label: 'Employee Full Name', placeholder: 'Rahul Sharma' },
+                    details: { label: 'Job Description / Role', placeholder: 'Has consistently delivered exceptional performance...' }
+                }
+            },
+            school: {
+                label: 'SCHOOL', template: 'classic', primary: '#2d3748', accent: '#ecc94b', text: '#1a202c', bg: '#f7fafc', border: '#ecc94b', borderStyle: 'double', defaultTitle: 'NON-MATRICULATION CERTIFICATE',
+                formLabels: {
+                    company: { label: 'School Name', placeholder: 'e.g., Delhi Public School' },
+                    address: { label: 'School Address', placeholder: 'New Delhi, India' },
+                    title: { label: 'Certificate Title', placeholder: 'e.g., Academic Excellence' },
+                    name: { label: 'Student Full Name', placeholder: 'Priya Singh' },
+                    details: { label: 'Academic Description', placeholder: 'Has successfully completed the course with distinction...' }
+                }
+            },
+            achievement: {
+                label: 'ACHIEVEMENT', template: 'elegant', primary: '#1a3a2a', accent: '#2d7d46', text: '#0f2a1a', bg: '#fafff7', border: '#2d7d46', borderStyle: 'groove', defaultTitle: 'CERTIFICATE OF EXCELLENCE',
+                formLabels: {
+                    company: { label: 'Awarding Organization', placeholder: 'e.g., Indian Sports Academy' },
+                    address: { label: 'Organization Address', placeholder: 'Pune, India' },
+                    title: { label: 'Award Title', placeholder: 'e.g., Best Athlete' },
+                    name: { label: 'Recipient Name', placeholder: 'Vikram Desai' },
+                    details: { label: 'Achievement Details', placeholder: 'For outstanding performance in the national championship...' }
+                }
+            },
+            medical: {
+                label: 'MEDICAL', template: 'modern', primary: '#0f2b4a', accent: '#3b82f6', text: '#0b1e33', bg: '#f0f8ff', border: '#3b82f6', borderStyle: 'solid', defaultTitle: 'CERTIFICATE OF MEDICAL COMPETENCY',
+                formLabels: {
+                    company: { label: 'Hospital / Clinic Name', placeholder: 'e.g., Apollo Hospital' },
+                    address: { label: 'Hospital Address', placeholder: 'Chennai, India' },
+                    title: { label: 'Medical Certificate Title', placeholder: 'e.g., Medical Proficiency' },
+                    name: { label: 'Doctor / Patient Name', placeholder: 'Dr. Anjali Nair' },
+                    details: { label: 'Medical Description', placeholder: 'Has demonstrated expertise in pediatric care...' }
+                }
+            },
+            government: {
+                label: 'GOVERNMENT', template: 'premium', primary: '#1a1a2e', accent: '#c9a84c', text: '#f0e9d8', bg: '#12121e', border: '#c9a84c', borderStyle: 'solid', defaultTitle: 'OFFICIAL GOVERNMENT CERTIFICATE',
+                formLabels: {
+                    company: { label: 'Issuing Authority', placeholder: 'e.g., Ministry of Education' },
+                    address: { label: 'Official Address', placeholder: 'New Delhi, India' },
+                    title: { label: 'Official Title', placeholder: 'e.g., Service Recognition' },
+                    name: { label: 'Officer / Recipient Name', placeholder: 'Suresh Kumar' },
+                    details: { label: 'Official Description', placeholder: 'For meritorious service to the nation...' }
+                }
+            },
+            other: {
+                label: 'OTHER', template: 'classic', primary: '#4a4a4a', accent: '#9ca3af', text: '#1f2937', bg: '#f9fafb', border: '#9ca3af', borderStyle: 'double', defaultTitle: 'CERTIFICATE OF RECOGNITION',
+                formLabels: {
+                    company: { label: 'Organization', placeholder: 'e.g., Any Organization' },
+                    address: { label: 'Address', placeholder: 'City, Country' },
+                    title: { label: 'Certificate Title', placeholder: 'e.g., Recognition' },
+                    name: { label: 'Recipient Name', placeholder: 'Full Name' },
+                    details: { label: 'Description', placeholder: 'Enter description...' }
+                }
+            }
+        };
+
+        // App Initializer Setup
+        function initApp() {
+            qrInstance = new QRCode(document.getElementById("qrcode"), {
+                text: window.location.href,
+                width: 70,
+                height: 70,
+                colorDark: "#0f172a",
+                colorLight: "#ffffff"
+            });
+            
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('inpIssueDate').value = today;
+            const future = new Date();
+            future.setFullYear(future.getFullYear() + 1);
+            document.getElementById('inpExpiryDate').value = future.toISOString().split('T')[0];
+            
+            generateCertId();
+            applyCategory('school');
+            applyDesign();
+            updateAll();
+            checkSharedCertificate();
+            document.querySelectorAll('.tool-section-content').forEach(el => el.classList.add('open'));
+            setupEventListeners();
+        }
+
+        function setupEventListeners() {
+            document.getElementById('secHeaderCategory').addEventListener('click', (e) => toggleSection(e.currentTarget));
+            document.getElementById('secHeaderTemplate').addEventListener('click', (e) => toggleSection(e.currentTarget));
+            document.getElementById('secHeaderContent').addEventListener('click', (e) => toggleSection(e.currentTarget));
+            document.getElementById('secHeaderDesign').addEventListener('click', (e) => toggleSection(e.currentTarget));
+            document.getElementById('secHeaderAdvanced').addEventListener('click', (e) => toggleSection(e.currentTarget));
+
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', () => applyCategory(btn.dataset.category));
+            });
+            document.querySelectorAll('.template-option').forEach(btn => {
+                btn.addEventListener('click', () => applyTemplate(btn.dataset.template));
+            });
+            document.querySelectorAll('.stamp-option').forEach(btn => {
+                btn.addEventListener('click', () => setStamp(btn.dataset.stamp));
+            });
+
+            document.getElementById('inpCompany').addEventListener('input', updateAll);
+            document.getElementById('inpAddress').addEventListener('input', updateAll);
+            document.getElementById('inpTitle').addEventListener('input', updateAll);
+            document.getElementById('inpName').addEventListener('input', updateAll);
+            document.getElementById('inpAge').addEventListener('input', updateAll);
+            document.getElementById('inpDetails').addEventListener('input', updateAll);
+            document.getElementById('inpWatermark').addEventListener('input', updateAll);
+            document.getElementById('inpIssueDate').addEventListener('change', updateAll);
+            document.getElementById('inpExpiryDate').addEventListener('change', updateAll);
+
+            document.getElementById('colorPrimary').addEventListener('change', applyDesign);
+            document.getElementById('colorAccent').addEventListener('change', applyDesign);
+            document.getElementById('colorText').addEventListener('change', applyDesign);
+            document.getElementById('colorBg').addEventListener('change', applyDesign);
+            document.getElementById('colorBorder').addEventListener('change', applyDesign);
+            document.getElementById('borderStyle').addEventListener('change', applyDesign);
+            document.getElementById('borderWidth').addEventListener('input', (e) => {
+                applyDesign();
+                document.getElementById('borderWidthLabel').textContent = e.target.value;
+            });
+
+            document.getElementById('inpPhoto').addEventListener('change', (e) => handlePhoto(e.target));
+            document.getElementById('inpSignature').addEventListener('change', (e) => handleSignature(e.target));
+            document.getElementById('regenCertIdBtn').addEventListener('click', generateCertId);
+            document.getElementById('refreshBtn').addEventListener('click', refreshCertificate);
+            document.getElementById('resetBtn').addEventListener('click', resetAll);
+
+            document.getElementById('publishBtn').addEventListener('click', saveToCloud);
+            document.getElementById('exportPngBtn').addEventListener('click', exportPNG);
+            document.getElementById('exportPdfBtn').addEventListener('click', exportPDF);
+            document.getElementById('printBtn').addEventListener('click', () => window.print());
+            document.getElementById('adminDeleteBtn').addEventListener('click', deleteFromCloud);
+
+            document.addEventListener('keydown', function(e) {
+                if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                    e.preventDefault();
+                    saveToCloud();
+                }
+            });
+        }
+
+        function toggleSection(header) {
+            const content = header.nextElementSibling;
+            content.classList.toggle('open');
+            const arrow = header.querySelector('.text-slate-400');
+            if (arrow) arrow.textContent = content.classList.contains('open') ? '▼' : '▶';
+        }
+
+        function updateFormLabels(category) {
+            const labels = categoryMap[category].formLabels;
+            document.getElementById('lblCompany').textContent = labels.company.label;
+            document.getElementById('inpCompany').placeholder = labels.company.placeholder;
+            document.getElementById('lblAddress').textContent = labels.address.label;
+            document.getElementById('inpAddress').placeholder = labels.address.placeholder;
+            document.getElementById('lblTitle').textContent = labels.title.label;
+            document.getElementById('inpTitle').placeholder = labels.title.placeholder;
+            document.getElementById('lblName').textContent = labels.name.label;
+            document.getElementById('inpName').placeholder = labels.name.placeholder;
+            document.getElementById('lblDetails').textContent = labels.details.label;
+            document.getElementById('inpDetails').placeholder = labels.details.placeholder;
+        }
+
+        function applyCategory(cat) {
+            currentCategory = cat;
+            const config = categoryMap[cat];
+            if (!config) return;
+
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.category === cat);
+            });
+
+            document.getElementById('categoryBadge').textContent = config.label;
+            document.getElementById('headerCategoryLabel').textContent = config.label;
+            document.getElementById('categoryBadgePreview').textContent = 'Current: ' + config.label;
+
+            updateFormLabels(cat);
+            applyTemplate(config.template);
+            
+            document.getElementById('colorPrimary').value = config.primary;
+            document.getElementById('colorAccent').value = config.accent;
+            document.getElementById('colorText').value = config.text;
+            document.getElementById('colorBg').value = config.bg;
+            document.getElementById('colorBorder').value = config.border;
+            document.getElementById('borderStyle').value = config.borderStyle;
+            
+            applyDesign();
+            updateAll();
+            flashCertificate();
+        }
+
+        function refreshCertificate() {
+            updateAll();
+            applyDesign();
+            flashCertificate();
+        }
+
+        function flashCertificate() {
+            const area = document.getElementById('certificateArea');
+            area.classList.remove('flash-animation');
+            void area.offsetWidth;
+            area.classList.add('flash-animation');
+            setTimeout(() => { area.classList.remove('flash-animation'); }, 700);
+        }
+
+        function updateAll() {
+            const company = document.getElementById('inpCompany').value || 'AUTHORITY / COMPANY';
+            const address = document.getElementById('inpAddress').value || 'OFFICIAL REGISTERED ADDRESS';
+            const title = document.getElementById('inpTitle').value || 'CERTIFICATE OF EXCELLENCE';
+            const name = document.getElementById('inpName').value || 'RECIPIENT NAME';
+            const age = document.getElementById('inpAge').value;
+            const details = document.getElementById('inpDetails').value || 'Has completed the required provisions honorably.';
+            const watermark = document.getElementById('inpWatermark').value || 'VERIFIED';
+            const issueDate = document.getElementById('inpIssueDate').value;
+            const expiryDate = document.getElementById('inpExpiryDate').value;
+
+            document.getElementById('certCompany').textContent = company;
+            document.getElementById('certAddress').textContent = address;
+            document.getElementById('certTitle').textContent = title;
+            document.getElementById('certName').textContent = name;
+            document.getElementById('certPhotoName').textContent = name;
+            document.getElementById('certDetails').textContent = details;
+            document.getElementById('watermarkLayer').textContent = watermark;
+
+            const ageElement = document.getElementById('certAgeDisplay');
+            if(age) {
+                ageElement.textContent = `(Age: ${age})`;
+                ageElement.classList.remove('hidden');
+            } else {
+                ageElement.classList.add('hidden');
+            }
+
+            if (issueDate) document.getElementById('issueDateDisplay').textContent = 'Issue: ' + formatDate(issueDate);
+            else document.getElementById('issueDateDisplay').textContent = 'Issue: —';
+            if (expiryDate) document.getElementById('expiryDateDisplay').textContent = 'Expiry: ' + formatDate(expiryDate);
+            else document.getElementById('expiryDateDisplay').textContent = 'Expiry: —';
+
+            const cid = document.getElementById('inpCertId').value || document.getElementById('certId').textContent;
+            if (cid && qrInstance) {
+                const url = window.location.origin + window.location.pathname + '?verify=' + cid;
+                qrInstance.clear();
+                qrInstance.makeCode(url);
+            }
+        }
+
+        function formatDate(dateStr) {
+            const d = new Date(dateStr + 'T00:00:00');
+            return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+
+        function handlePhoto(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    base64Photo = e.target.result;
+                    document.getElementById('certPhoto').src = base64Photo;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function handleSignature(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    base64Signature = e.target.result;
+                    document.getElementById('signatureImage').src = base64Signature;
+                    document.getElementById('signatureImage').classList.remove('hidden');
+                    document.getElementById('certSignature').classList.add('hidden');
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function generateCertId() {
+            const prefix = 'ICP';
+            const ts = Date.now().toString().slice(-6);
+            const rand = Math.floor(10 + Math.random() * 90);
+            const id = prefix + '-' + ts + rand;
+            document.getElementById('inpCertId').value = id;
+            document.getElementById('certId').textContent = id;
+            updateAll();
+        }
+
+        function applyTemplate(template) {
+            currentTemplate = template;
+            const area = document.getElementById('certificateArea');
+            area.classList.remove('template-classic', 'template-modern', 'template-elegant', 'template-premium');
+            area.classList.add('template-' + template);
+
+            document.querySelectorAll('.template-option').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.template === template);
+            });
+
+            const styles = getComputedStyle(area);
+            const primary = rgbToHex(styles.getPropertyValue('--cert-primary').trim());
+            const accent = rgbToHex(styles.getPropertyValue('--cert-accent').trim());
+            const text = rgbToHex(styles.getPropertyValue('--cert-text').trim());
+            const bg = rgbToHex(styles.getPropertyValue('--cert-bg').trim());
+            const border = rgbToHex(styles.getPropertyValue('--cert-border').trim());
+            const borderStyle = styles.getPropertyValue('--cert-border-style').trim() || 'double';
+            
+            document.getElementById('colorPrimary').value = primary;
+            document.getElementById('colorAccent').value = accent;
+            document.getElementById('colorText').value = text;
+            document.getElementById('colorBg').value = bg;
+            document.getElementById('colorBorder').value = border;
+            document.getElementById('borderStyle').value = borderStyle;
+            applyDesign();
+            updateAll();
+        }
+
+        function rgbToHex(rgb) {
+            if (!rgb || rgb === '') return '#000000';
+            const match = rgb.match(/\d+/g);
+            if (!match) return '#000000';
+            const r = parseInt(match[0]), g = parseInt(match[1]), b = parseInt(match[2]);
+            return '#' + [r, g, b].map(c => c.toString(16).padStart(2, '0')).join('');
+        }
+
+        function applyDesign() {
+            const area = document.getElementById('certificateArea');
+            const primary = document.getElementById('colorPrimary').value;
+            const accent = document.getElementById('colorAccent').value;
+            const text = document.getElementById('colorText').value;
+            const bg = document.getElementById('colorBg').value;
+            const border = document.getElementById('colorBorder').value;
+            const style = document.getElementById('borderStyle').value;
+            const width = document.getElementById('borderWidth').value;
+
+            area.style.setProperty('--cert-primary', primary);
+            area.style.setProperty('--cert-accent', accent);
+            area.style.setProperty('--cert-text', text);
+            area.style.setProperty('--cert-bg', bg);
+            area.style.setProperty('--cert-border', border);
+            area.style.setProperty('--cert-border-style', style);
+            area.style.borderWidth = width + 'px';
+            area.style.borderColor = border;
+            area.style.borderStyle = style;
+
+            // Extra style dynamic elements synchronization
+            document.getElementById('certAccentDivider').style.backgroundColor = accent;
+            document.getElementById('footerBrandCircle').style.borderColor = accent;
+            document.getElementById('footerBrandText').style.color = primary;
+            document.getElementById('footerAuditText').style.color = primary;
+
+            if (qrInstance) {
+                const url = qrInstance._htOption ? qrInstance._htOption.text : window.location.href;
+                qrInstance.clear();
+                qrInstance.makeCode(url);
+            }
+            updateAll();
+        }
+
+        function setStamp(type) {
+            currentStamp = type;
+            document.querySelectorAll('.stamp-option').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.stamp === type);
+            });
+            renderStamp();
+        }
+
+        function renderStamp() {
+            const container = document.getElementById('stampContainer');
+            const map = {
+                'none': '',
+                'seal': '<div class="stamp-circle" style="border-color:var(--cert-accent);color:var(--cert-accent);">अक्ल की<br>जीत</div>',
+                'star': '<div class="stamp-circle" style="border-color:var(--cert-accent);color:var(--cert-accent);">⭐<br>WISDOM</div>',
+                'shield': '<div class="stamp-circle" style="border-color:var(--cert-accent);color:var(--cert-accent);">🛡️<br>SECURE</div>',
+                'certified': '<div class="stamp-circle" style="border-color:var(--cert-accent);color:var(--cert-accent);">✅<br>VERIFIED</div>'
+            };
+            container.innerHTML = map[currentStamp] || '';
+        }
+
+        function resetAll() {
+            document.getElementById('inpCompany').value = 'DR. MUKHTAR AHMAD ANSARI JUNIOR HIGH SCHOOL';
+            document.getElementById('inpAddress').value = 'BANSBARIYA, DISTRICT: HOOGHLY, WEST BENGAL, PIN: 712502';
+            document.getElementById('inpTitle').value = 'NON-MATRICULATION CERTIFICATE';
+            document.getElementById('inpName').value = 'TAMEER ALI KHAN';
+            document.getElementById('inpAge').value = '28';
+            document.getElementById('inpDetails').value = 'This is to certify that the above-mentioned student has studied in this institution and left school prior to completing the matriculation framework requirements.';
+            document.getElementById('inpWatermark').value = 'SCHOOL RECORD';
+            document.getElementById('inpPhoto').value = '';
+            document.getElementById('inpSignature').value = '';
+            base64Photo = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=256&auto=format&fit=crop';
+            base64Signature = null;
+            document.getElementById('certPhoto').src = base64Photo;
+            document.getElementById('signatureImage').classList.add('hidden');
+            document.getElementById('signatureImage').src = '';
+            document.getElementById('certSignature').classList.remove('hidden');
+            
+            applyCategory('school');
+            generateCertId();
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('inpIssueDate').value = today;
+            const future = new Date();
+            future.setFullYear(future.getFullYear() + 1);
+            document.getElementById('inpExpiryDate').value = future.toISOString().split('T')[0];
+            setStamp('none');
+            updateAll();
+            flashCertificate();
+        }
+
+        function exportPNG() {
+            const area = document.getElementById('certificateArea');
+            html2canvas(area, { useCORS: true, scale: 3, logging: false }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'ICP_Certificate_' + (document.getElementById('inpName').value || 'Recipient') + '.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+
+        function exportPDF() {
+            const area = document.getElementById('certificateArea');
+            html2canvas(area, { useCORS: true, scale: 2.5, logging: false }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('l', 'mm', 'a4');
+                const pdfWidth = 280;
+                const pdfHeight = (canvas.height / canvas.width) * pdfWidth;
+                pdf.addImage(imgData, 'PNG', 5, 5, pdfWidth - 10, pdfHeight - 10);
+                pdf.save('ICP_Certificate_' + (document.getElementById('inpName').value || 'Recipient') + '.pdf');
+            });
+        }
+
+        // ─── CLOUD DATA STORAGE & VALIDATION ───
+        function saveToCloud() {
+            const ageVal = parseInt(document.getElementById('inpAge').value);
+            
+            // 1-100 वर्ष की आयु सीमा का सत्यापन 
+            if (isNaN(ageVal) || ageVal < 1 || ageVal > 100) {
+                alert("⚠️ अमान्य आयु! आयु सीमा केवल 1 से 100 वर्ष के बीच होनी आवश्यक है।");
+                return;
+            }
+
+            const uid = document.getElementById('inpCertId').value || 'ICP-' + Date.now().toString().slice(-6);
+            document.getElementById('certId').textContent = uid;
+
+            const payload = {
+                company: document.getElementById('inpCompany').value || 'AUTHORITY / COMPANY',
+                address: document.getElementById('inpAddress').value || 'OFFICIAL REGISTERED ADDRESS',
+                title: document.getElementById('inpTitle').value || 'CERTIFICATE OF EXCELLENCE',
+                name: document.getElementById('inpName').value || 'RECIPIENT NAME',
+                age: ageVal,
+                details: document.getElementById('inpDetails').value || 'Has completed the required provisions honorably.',
+                photo: base64Photo,
+                signature: base64Signature || null,
+                issueDate: document.getElementById('inpIssueDate').value || '',
+                expiryDate: document.getElementById('inpExpiryDate').value || '',
+                watermark: document.getElementById('inpWatermark').value || 'VERIFIED',
+                template: currentTemplate,
+                stamp: currentStamp,
+                category: currentCategory,
+                id: uid,
+                timestamp: Date.now()
+            };
+
+            const certRef = ref(database, 'certificates/' + uid);
+            set(certRef, payload)
+                .then(() => {
+                    const url = window.location.origin + window.location.pathname + '?verify=' + uid;
+                    qrInstance.clear();
+                    qrInstance.makeCode(url);
+                    alert('✅ Record successfully synced to cloud. the victory of wisdom (अक्ल की जीत)!');
+                })
+                .catch(err => {
+                    console.error('Cloud Error:', err);
+                    alert('❌ कॉन्फ़िगरेशन एरर! कृपया अपनी Realtime Database क्रेडेंशियल्स चेक करें।');
+                });
+        }
+
+        // ─── ADMIN SECURITY FEATURE (DELETE RECORD) ───
+        function deleteFromCloud() {
+            const uid = document.getElementById('inpCertId').value;
+            if (!uid || uid === 'ICP-UNPUBLISHED') {
+                alert("❌ कोई भी सक्रिय रिकॉर्ड डिलीट करने के लिए उपलब्ध नहीं है।");
+                return;
+            }
+
+            const password = prompt("⚠️ एडमिन सुरक्षा प्रमाणीकरण! रिकॉर्ड डिलीट करने के लिए पासवर्ड दर्ज करें:");
+            if (password === 'tamir@lI00769') {
+                if (confirm("क्या आप वाकई इस रिकॉर्ड को डेटाबेस क्लाउड से हमेशा के लिए डिलीट करना चाहते हैं?")) {
+                    const certRef = ref(database, 'certificates/' + uid);
+                    remove(certRef)
+                        .then(() => {
+                            alert("🗑️ रिकॉर्ड क्लाउड डेटाबेस से पूरी तरह डिलीट कर दिया गया है।");
+                            window.location.href = window.location.origin + window.location.pathname;
+                        })
+                        .catch(err => {
+                            alert("❌ डिलीट करने में विफलता: " + err.message);
+                        });
+                }
+            } else if (password !== null) {
+                alert("❌ गलत पासवर्ड! सुरक्षा उल्लंघन ब्लॉक किया गया।");
+            }
+        }
+
+        // ─── CLOUD SYNC & AUTO-VERIFICATION ENGINE ───
+        function checkSharedCertificate() {
+            const params = new URLSearchParams(window.location.search);
+            const verifyId = params.get('verify');
+            if (!verifyId) return;
+
+            const certRef = ref(database, 'certificates/' + verifyId);
+            get(certRef).then(snap => {
+                const data = snap.val();
+                if (!data) {
+                    alert('⚠️ क्रिटिकल अलर्ट: यह सर्टिफिकेट आईडी डेटाबेस रिकॉर्ड से मेल नहीं खाती! फर्जीवाड़े से सावधान रहें।');
+                    return;
+                }
+                document.getElementById('inpCompany').value = data.company || '';
+                document.getElementById('inpAddress').value = data.address || '';
+                document.getElementById('inpTitle').value = data.title || '';
+                document.getElementById('inpName').value = data.name || '';
+                document.getElementById('inpAge').value = data.age || '';
+                document.getElementById('inpDetails').value = data.details || '';
+                document.getElementById('inpWatermark').value = data.watermark || '';
+                document.getElementById('inpCertId').value = data.id || verifyId;
+                document.getElementById('inpIssueDate').value = data.issueDate || '';
+                document.getElementById('inpExpiryDate').value = data.expiryDate || '';
+                
+                if (data.photo && data.photo.startsWith('data:image')) {
+                    base64Photo = data.photo;
+                    document.getElementById('certPhoto').src = base64Photo;
+                }
+                if (data.signature) {
+                    base64Signature = data.signature;
+                    document.getElementById('signatureImage').src = base64Signature;
+                    document.getElementById('signatureImage').classList.remove('hidden');
+                    document.getElementById('certSignature').classList.add('hidden');
+                }
+                if (data.template) applyTemplate(data.template);
+                if (data.stamp) setStamp(data.stamp);
+                else setStamp('none');
+                if (data.category) applyCategory(data.category);
+                else applyCategory('work');
+
+                document.getElementById('certId').textContent = data.id || verifyId;
+                updateAll();
+                applyDesign();
+
+                // Visitor view में फॉर्म हाइड करना पर एडमिन सुरक्षा डिलीट बटन को एक्टिव रखना
+                document.getElementById('editorPanel').classList.add('hidden');
+                document.getElementById('adminDeleteBtn').classList.remove('hidden');
+                
+                const pv = document.getElementById('previewContainer');
+                pv.classList.remove('lg:col-span-8');
+                pv.classList.add('lg:col-span-12', 'w-full', 'items-center');
+                document.getElementById('verifiedBadge').classList.remove('hidden');
+                document.getElementById('verifiedBadge').classList.add('flex');
+
+                const url = window.location.origin + window.location.pathname + '?verify=' + (data.id || verifyId);
+                qrInstance.clear();
+                qrInstance.makeCode(url);
+                flashCertificate();
+            }).catch(err => {
+                console.error("Data Fetch Error:", err);
+            });
+        }
+
+        // Initialize JavaScript Engine on Core Load completion
+        initApp();
+    </script>
+</body>
+</html>
